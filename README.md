@@ -9,6 +9,6 @@ Pytorch, Pytorch Lightning, HuggingFace, Pandas
 pip install -r requirements.txt
 
 # Run 
-  🟢 Running on Google Colab instance: run_experiment.ipynb 
+  🟢 Running on Google Colab instance: run_experiment.ipynb (automatic on CPU, GPU or TPU)
   
   🟢 Running on Python: git clone, install requirements, run nlp_classification.py script with desired parameters
