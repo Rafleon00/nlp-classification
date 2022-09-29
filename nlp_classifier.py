@@ -53,7 +53,7 @@ After a complete study of the inputs and the classification objectives, the hypo
 Base on this, there are three inputs with relevant information in text format (description, features and title), which need to be converted into tensors that compress the context of them. Apart from this, the rest of the inputs are discrete values that need to be normalized in order to build a more robust learning process
 """
 
-class CasafariDataset(Dataset):
+class TaskDataset(Dataset):
   # Custom Pytorch Dataset for preprocessing examples provided in pandas DataFrame format
   # label_map = {0: apartment, 1: house}
 
@@ -104,7 +104,7 @@ class CasafariDataset(Dataset):
             "label": label}
 
 
-class CasafariDataModule(pl.LightningDataModule):
+class TaskDataModule(pl.LightningDataModule):
 
   # LightningDataModule object that splits data and encapsualte training, 
   # validation and test dataloaders enabling cpu/gpu with multiple cores
@@ -138,7 +138,7 @@ class CasafariDataModule(pl.LightningDataModule):
 
   def train_dataloader(self):
     return DataLoader(
-        dataset=CasafariDataset(data=self.train_df, 
+        dataset=TaskDataset(data=self.train_df, 
                                 model_name_or_path=self.model_name_or_path,
                                 max_seq_length=self.max_seq_length),
         batch_size=self.batch_size,
@@ -149,7 +149,7 @@ class CasafariDataModule(pl.LightningDataModule):
 
   def val_dataloader(self):
     return DataLoader(
-        dataset=CasafariDataset(data=self.val_df, 
+        dataset=TaskDataset(data=self.val_df, 
                                 model_name_or_path=self.model_name_or_path,
                                 max_seq_length=self.max_seq_length),
         batch_size=self.batch_size,
@@ -160,7 +160,7 @@ class CasafariDataModule(pl.LightningDataModule):
 
   def test_dataloader(self):
     return DataLoader(
-        dataset=CasafariDataset(data=self.test_df, 
+        dataset=TaskDataset(data=self.test_df, 
                                 model_name_or_path=self.model_name_or_path,
                                 max_seq_length=self.max_seq_length),
         batch_size=BATCH_SIZE_TESTING,
@@ -195,7 +195,7 @@ More specifically, in this particular case we are interested in mapping each tex
 https://huggingface.co/sentence-transformers/all-mpnet-base-v2 
 """
 
-class CasafariNN(nn.Module):
+class ModelNN(nn.Module):
 
   # Architecure of the MLP + transformer embeddings
 
@@ -248,8 +248,8 @@ class CasafariNN(nn.Module):
     )
     return parser
 
-
-class CasafariClassifier(pl.LightningModule):
+  
+class ModelClassifier(pl.LightningModule):
 
   # Lightning module  for binary classification of houses and apartments
   
@@ -338,8 +338,8 @@ def _setup_parser():
   )
   
   # Model and Datamodule specific args
-  parser = CasafariDataModule.add_to_argparse(parser)
-  parser = CasafariClassifier.add_to_argparse(parser)
+  parser = TaskDataModule.add_to_argparse(parser)
+  parser = ModelClassifier.add_to_argparse(parser)
   # Trainer specific args
   parser = pl.Trainer.add_argparse_args(parser)
   args = parser.parse_args()
@@ -358,11 +358,11 @@ def main():
     callbacks = [early_stopping_callback, model_checkpoint_callback]
     
     # Create DataModule object
-    datamodule = CasafariDataModule(args=args)
+    datamodule = TaskDataModule(args=args)
     
     # Create Model
-    base_model = CasafariNN(args=args)
-    model = CasafariClassifier(model=base_model,args=args)
+    base_model = ModelNN(args=args)
+    model = ModelClassifier(model=base_model,args=args)
     
     # Create Trainer (run on GPU or CPU)
     trainer = pl.Trainer(accelerator="auto", 
